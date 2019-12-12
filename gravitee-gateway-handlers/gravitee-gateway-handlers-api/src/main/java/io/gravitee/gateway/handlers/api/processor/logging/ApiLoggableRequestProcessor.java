@@ -29,6 +29,7 @@ public class ApiLoggableRequestProcessor extends LoggableRequestProcessor {
 
     private final LoggingMode mode;
     private int maxSizeLogMessage;
+    private String responseTypes;
 
     public ApiLoggableRequestProcessor(Logging logging) {
         super(new ExpressionLanguageBasedConditionEvaluator(logging.getCondition()));
@@ -42,6 +43,7 @@ public class ApiLoggableRequestProcessor extends LoggableRequestProcessor {
             context.setAttribute(ExecutionContext.ATTR_PREFIX + "logging.client", mode.isClientMode());
             context.setAttribute(ExecutionContext.ATTR_PREFIX + "logging.proxy", mode.isProxyMode());
             context.setAttribute(ExecutionContext.ATTR_PREFIX + "logging.max.size.log.message", maxSizeLogMessage);
+            context.setAttribute(ExecutionContext.ATTR_PREFIX + "logging.response.types", responseTypes);
 
             return mode.isClientMode();
         }
@@ -51,5 +53,9 @@ public class ApiLoggableRequestProcessor extends LoggableRequestProcessor {
 
     public void setMaxSizeLogMessage(int maxSizeLogMessage) {
         this.maxSizeLogMessage = maxSizeLogMessage;
+    }
+
+    public void setResponseTypes(String responseTypes) {
+        this.responseTypes = responseTypes;
     }
 }

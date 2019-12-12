@@ -15,6 +15,7 @@
  */
 package io.gravitee.gateway.core.logging;
 
+import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.handler.Handler;
 import io.gravitee.gateway.api.proxy.ProxyConnection;
@@ -29,8 +30,9 @@ public class LimitedLoggableProxyConnection extends LoggableProxyConnection {
 
     private final int maxSizeLogMessage;
 
-    public LimitedLoggableProxyConnection(ProxyConnection proxyConnection, ProxyRequest proxyRequest, int maxSizeLogMessage) {
-        super(proxyConnection, proxyRequest);
+    public LimitedLoggableProxyConnection(ProxyConnection proxyConnection, ProxyRequest proxyRequest,
+                                          final ExecutionContext context, int maxSizeLogMessage) {
+        super(proxyConnection, proxyRequest, context);
         this.maxSizeLogMessage = maxSizeLogMessage;
     }
 
@@ -39,26 +41,27 @@ public class LimitedLoggableProxyConnection extends LoggableProxyConnection {
         buffer.appendBuffer(chunk, maxSizeLogMessage);
     }
 
-    protected ProxyConnection responseHandler(ProxyConnection proxyConnection, Handler<ProxyResponse> responseHandler) {
-        return proxyConnection.responseHandler(new LimitedLoggableProxyResponseHandler(responseHandler));
+    protected ProxyConnection responseHandler(ProxyConnection proxyConnection, Handler<ProxyResponse> responseHandler,
+                                              final ExecutionContext context) {
+        return proxyConnection.responseHandler(new LimitedLoggableProxyResponseHandler(responseHandler, context));
     }
 
     class LimitedLoggableProxyResponseHandler extends LoggableProxyResponseHandler {
 
-        LimitedLoggableProxyResponseHandler(Handler<ProxyResponse> responseHandler) {
-            super(responseHandler);
+        LimitedLoggableProxyResponseHandler(Handler<ProxyResponse> responseHandler, final ExecutionContext context) {
+            super(responseHandler, context);
         }
 
         @Override
         protected void handle(Handler<ProxyResponse> responseHandler, ProxyResponse proxyResponse) {
-            responseHandler.handle(new LimitedLoggableProxyResponse(proxyResponse));
+            responseHandler.handle(new LimitedLoggableProxyResponse(proxyResponse, context));
         }
     }
 
     class LimitedLoggableProxyResponse extends LoggableProxyResponse {
 
-        LimitedLoggableProxyResponse(ProxyResponse proxyResponse) {
-            super(proxyResponse);
+        LimitedLoggableProxyResponse(ProxyResponse proxyResponse, final ExecutionContext context) {
+            super(proxyResponse, context);
         }
 
         @Override

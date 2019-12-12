@@ -16,6 +16,14 @@
 package io.gravitee.gateway.core.logging.utils;
 
 import io.gravitee.gateway.api.ExecutionContext;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+
+import java.util.List;
+
+import static io.gravitee.common.http.MediaType.*;
+import static io.gravitee.common.http.MediaType.TEXT_HTML;
+import static java.util.Arrays.asList;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -23,11 +31,24 @@ import io.gravitee.gateway.api.ExecutionContext;
  */
 public final class LoggingUtils {
 
+    private static final List<String> RESPONSE_CONTENT_TYPES = asList(APPLICATION_JSON, APPLICATION_XML,
+            APPLICATION_ATOM_XML, APPLICATION_XHTML_XML, TEXT_PLAIN, TEXT_XML, TEXT_HTML);
+
     public static int getMaxSizeLogMessage(ExecutionContext executionContext) {
         try {
             return (int) executionContext.getAttribute(ExecutionContext.ATTR_PREFIX + "logging.max.size.log.message");
         } catch (Exception ex) {
             return -1;
+        }
+    }
+
+    public static boolean isResponseContentTypeLoggable(final String contentType, final ExecutionContext executionContext) {
+        final String responseTypes =
+                (String) executionContext.getAttribute(ExecutionContext.ATTR_PREFIX + "logging.response.types");
+        if (responseTypes == null) {
+            return contentType == null || RESPONSE_CONTENT_TYPES.contains(contentType.toLowerCase());
+        } else {
+            return responseTypes.toLowerCase().contains(contentType.toLowerCase());
         }
     }
 }

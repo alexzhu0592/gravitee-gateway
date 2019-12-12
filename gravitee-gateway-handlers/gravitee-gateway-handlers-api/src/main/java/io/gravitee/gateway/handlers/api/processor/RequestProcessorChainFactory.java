@@ -47,6 +47,8 @@ public class RequestProcessorChainFactory extends ApiProcessorChainFactory {
 
     @Value("${reporters.logging.max_size:-1}")
     private int maxSizeLogMessage;
+    @Value("${reporters.logging.response_types:#{null}}")
+    private String responseTypes;
 
     public void afterPropertiesSet() {
         PolicyChainResolver apiPolicyResolver = new ApiPolicyChainResolver(StreamType.ON_REQUEST);
@@ -72,6 +74,7 @@ public class RequestProcessorChainFactory extends ApiProcessorChainFactory {
                         // log max size limit is in MB format
                         // -1 means no limit
                         processor.setMaxSizeLogMessage((maxSizeLogMessage <= - 1) ? -1 : maxSizeLogMessage * (1024 * 1024));
+                        processor.setResponseTypes(responseTypes);
 
                         return new StreamableProcessorDecorator<>(processor);
                     }
